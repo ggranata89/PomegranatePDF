@@ -1,17 +1,26 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using PdfMergerWasm.Models;
 using PdfMergerWasm.Services;
 using PdfMergerWasm.Services.Abstractions;
 
 namespace PdfMergerWasm.Pages;
 
 /// <summary>
-/// Code-behind della pagina principale: coordina l'input utente con i servizi applicativi (SRP / Observer).
+/// Code-behind della pagina principale: guida l'utente attraverso un wizard a 3 step
+/// con anteprima dei singoli file caricati e del PDF finale unito.
 /// </summary>
-public partial class Home : IDisposable
+public partial class Home : IAsyncDisposable
 {
     private const long MaxFileSizeBytes = 50 * 1024 * 1024;
     private const int MaxFilesPerSelection = 50;
+
+    private enum WizardStep
+    {
+        Upload = 1,
+        Arrange = 2,
+        PreviewAndDownload = 3
+    }
 
     [Inject]
     private PdfWorkspaceService Workspace { get; set; } = default!;
@@ -22,10 +31,23 @@ public partial class Home : IDisposable
     [Inject]
     private IFileDownloader FileDownloader { get; set; } = default!;
 
+    [Inject]
+    private IPdfPreviewProvider PreviewProvider { get; set; } = default!;
+
+    private WizardStep CurrentStep { get; set; } = WizardStep.Upload;
     private string OutputFileName { get; set; } = string.Empty;
     private string? ErrorMessage { get; set; }
     private string? StatusMessage { get; set; }
     private bool IsBusy { get; set; }
+
+    // Stato anteprima singolo documento caricato
+    private Guid? PreviewedDocumentId { get; set; }
+    private string? DocumentPreviewUrl { get; set; }
+    private string? PreviewedDocumentName { get; set; }
+
+    // Stato anteprima e byte del PDF finale unito (Step 3)
+    private byte[]? MergedOutputBytes { get; set; }
+    private string? OutputPreviewUrl { get; set; }
 
     /// <summary>
     /// Sottoscrive gli aggiornamenti dello stato del workspace all'inizializzazione del componente.
@@ -36,11 +58,13 @@ public partial class Home : IDisposable
     }
 
     /// <summary>
-    /// Rimuove la sottoscrizione allo stato del workspace per evitare memory leak.
+    /// Rilascia la sottoscrizione al workspace e gli eventuali Blob URL di anteprima attivi.
     /// </summary>
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
         Workspace.StateChanged -= OnWorkspaceStateChanged;
+        await ClearDocumentPreviewAsync();
+        await ClearOutputPreviewAsync();
     }
 
     /// <summary>
@@ -71,23 +95,129 @@ public partial class Home : IDisposable
     }
 
     /// <summary>
-    /// Unisce i PDF nell'ordine corrente, applica le rotazioni e avvia il download del risultato.
+    /// Apre o chiude l'anteprima inline di un documento caricato.
     /// </summary>
-    private async Task MergeAndDownloadAsync()
+    private async Task ToggleDocumentPreviewAsync(PdfDocumentItem document)
     {
+        if (PreviewedDocumentId == document.Id)
+        {
+            await ClearDocumentPreviewAsync();
+            return;
+        }
+
+        await ClearDocumentPreviewAsync();
+        DocumentPreviewUrl = await PreviewProvider.CreatePreviewUrlAsync(document.Content);
+        PreviewedDocumentId = document.Id;
+        PreviewedDocumentName = document.FileName;
+    }
+
+    /// <summary>
+    /// Rimuove un documento dalla coda e chiude la sua eventuale anteprima attiva.
+    /// </summary>
+    private async Task RemoveDocumentAsync(Guid documentId)
+    {
+        if (PreviewedDocumentId == documentId)
+        {
+            await ClearDocumentPreviewAsync();
+        }
+
+        Workspace.RemoveDocument(documentId);
+
+        if (Workspace.Documents.Count == 0)
+        {
+            await ClearOutputPreviewAsync();
+            CurrentStep = WizardStep.Upload;
+        }
+    }
+
+    /// <summary>
+    /// Svuota l'intera lista documenti e riporta il wizard al primo step.
+    /// </summary>
+    private async Task ClearWorkspaceAsync()
+    {
+        ResetFeedback();
+        await ClearDocumentPreviewAsync();
+        await ClearOutputPreviewAsync();
+        Workspace.Clear();
+        OutputFileName = string.Empty;
+        CurrentStep = WizardStep.Upload;
+    }
+
+    /// <summary>
+    /// Passa allo step indicato, generando l'anteprima finale quando si entra nello step 3.
+    /// </summary>
+    private async Task GoToStepAsync(WizardStep targetStep)
+    {
+        if (IsBusy || targetStep == CurrentStep)
+        {
+            return;
+        }
+
+        if (targetStep != WizardStep.Upload && Workspace.Documents.Count == 0)
+        {
+            return;
+        }
+
+        ResetFeedback();
+
+        if (targetStep == WizardStep.PreviewAndDownload)
+        {
+            await GenerateOutputPreviewAsync();
+            return;
+        }
+
+        await ClearOutputPreviewAsync();
+        CurrentStep = targetStep;
+    }
+
+    /// <summary>
+    /// Genera il PDF unito in memoria e crea il relativo URL per l'anteprima nello step 3.
+    /// </summary>
+    private async Task GenerateOutputPreviewAsync()
+    {
+        IsBusy = true;
+
+        try
+        {
+            await ClearDocumentPreviewAsync();
+            await ClearOutputPreviewAsync();
+
+            MergedOutputBytes = PdfMerger.Merge(Workspace.Documents);
+            OutputPreviewUrl = await PreviewProvider.CreatePreviewUrlAsync(MergedOutputBytes);
+            CurrentStep = WizardStep.PreviewAndDownload;
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Errore durante la generazione dell'anteprima finale: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    /// <summary>
+    /// Avvia il download del PDF già unito e visualizzato in anteprima nello step 3.
+    /// </summary>
+    private async Task DownloadMergedPdfAsync()
+    {
+        if (MergedOutputBytes is null)
+        {
+            return;
+        }
+
         ResetFeedback();
         IsBusy = true;
 
         try
         {
-            var mergedBytes = PdfMerger.Merge(Workspace.Documents);
             var safeFileName = ResolveOutputFileName(OutputFileName);
-            await FileDownloader.DownloadAsync(safeFileName, mergedBytes);
-            StatusMessage = $"PDF '{safeFileName}' generato ({Workspace.TotalPages} pagine totali).";
+            await FileDownloader.DownloadAsync(safeFileName, MergedOutputBytes);
+            StatusMessage = $"PDF '{safeFileName}' scaricato ({Workspace.TotalPages} pagine totali).";
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"Errore durante l'unione dei PDF: {ex.Message}";
+            ErrorMessage = $"Errore durante il download del PDF: {ex.Message}";
         }
         finally
         {
@@ -123,6 +253,45 @@ public partial class Home : IDisposable
     }
 
     /// <summary>
+    /// Revoca il Blob URL dell'anteprima documento corrente, se presente.
+    /// </summary>
+    private async Task ClearDocumentPreviewAsync()
+    {
+        if (DocumentPreviewUrl is not null)
+        {
+            await PreviewProvider.RevokePreviewUrlAsync(DocumentPreviewUrl);
+            DocumentPreviewUrl = null;
+        }
+
+        PreviewedDocumentId = null;
+        PreviewedDocumentName = null;
+    }
+
+    /// <summary>
+    /// Revoca il Blob URL dell'anteprima finale e libera i byte generati in precedenza.
+    /// </summary>
+    private async Task ClearOutputPreviewAsync()
+    {
+        if (OutputPreviewUrl is not null)
+        {
+            await PreviewProvider.RevokePreviewUrlAsync(OutputPreviewUrl);
+            OutputPreviewUrl = null;
+        }
+
+        MergedOutputBytes = null;
+    }
+
+    /// <summary>
+    /// Formatta la dimensione in byte in formato leggibile.
+    /// </summary>
+    private static string FormatByteSize(int byteCount) => byteCount switch
+    {
+        < 1024 => $"{byteCount} B",
+        < 1024 * 1024 => $"{byteCount / 1024.0:F1} KB",
+        _ => $"{byteCount / (1024.0 * 1024.0):F2} MB"
+    };
+
+    /// <summary>
     /// Usa il nome scelto dall'utente (aggiungendo .pdf se mancante) oppure genera un nome univoco con timestamp se vuoto.
     /// </summary>
     private static string ResolveOutputFileName(string rawName)
@@ -152,4 +321,3 @@ public partial class Home : IDisposable
     /// </summary>
     private void OnWorkspaceStateChanged() => InvokeAsync(StateHasChanged);
 }
-

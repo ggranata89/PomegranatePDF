@@ -21,3 +21,23 @@ export function downloadFileFromBytes(fileName, contentType, bytes) {
     }
 }
 
+/**
+ * Crea un Blob URL temporaneo per visualizzare un PDF in anteprima (iframe/embed).
+ * @param {Uint8Array} bytes - Contenuto binario del PDF.
+ * @returns {string} Object URL creato dal browser.
+ */
+export function createPdfObjectUrl(bytes) {
+    const blob = new Blob([bytes], { type: "application/pdf" });
+    return URL.createObjectURL(blob);
+}
+
+/**
+ * Rilascia un Blob URL precedentemente creato con createPdfObjectUrl.
+ * @param {string} url - Object URL da revocare.
+ */
+export function revokePdfObjectUrl(url) {
+    if (url) {
+        URL.revokeObjectURL(url);
+    }
+}
+

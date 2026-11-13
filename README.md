@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # PomegranatePDF
 
 Applicazione **Blazor WebAssembly (PWA)** per unire, ruotare e riordinare più file PDF direttamente nel browser, senza alcun upload su server esterni. Funziona su qualsiasi sistema operativo moderno (**Windows, macOS, Linux, ChromeOS**).
@@ -38,7 +37,3 @@ dotnet run
 
 Apri quindi il browser all'indirizzo indicato nel terminale.
 
-=======
-# PomegranatePDF-
-Applicazione per l'unione di più PDF in unico File
->>>>>>> e0007adfd1ce86be44a1d3856880475d0a6c82a2

@@ -29,6 +29,9 @@ builder.Services.AddScoped<IPdfMerger, PdfSharpMerger>();
 // Adapter per il download del file generato tramite JSInterop isolato (DIP)
 builder.Services.AddScoped<IFileDownloader, BrowserFileDownloader>();
 
+// Provider per la gestione degli URL temporanei di anteprima PDF nel browser (DIP)
+builder.Services.AddScoped<IPdfPreviewProvider, BrowserPdfPreviewProvider>();
+
 // Gestore centralizzato dello stato della coda documenti con notifica ai subscriber (Observer Pattern)
 builder.Services.AddScoped<PdfWorkspaceService>();
 

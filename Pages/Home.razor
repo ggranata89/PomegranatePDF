@@ -2,29 +2,50 @@
 
 <PageTitle>PomegranatePDF - Unisci e Ruota PDF</PageTitle>
 
-<div class="container py-4" style="max-width: 900px;">
+<div class="container py-4" style="max-width: 960px;">
     <header class="mb-4">
-        <h1 class="h2 fw-bold mb-1">PomegranatePDF</h1>
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <img src="favicon.svg" alt="PomegranatePDF" width="36" height="36" />
+            <h1 class="h2 fw-bold mb-0">PomegranatePDF</h1>
+        </div>
         <p class="text-muted mb-0">
-            Carica più file PDF, ruotali, cambia l'ordine e uniscili in un unico documento.
+            Carica più file PDF, visualizzane l'anteprima, ruotali, cambia l'ordine e uniscili in un unico documento.
             Elaborazione 100% locale nel browser (nessun file viene inviato in rete).
         </p>
     </header>
 
-    <section class="card shadow-sm mb-4">
-        <div class="card-body">
-            <label for="pdfInput" class="form-label fw-semibold">Aggiungi uno o più file PDF</label>
-            <InputFile id="pdfInput"
-                       class="form-control"
-                       OnChange="HandleFilesSelectedAsync"
-                       multiple
-                       accept=".pdf,application/pdf"
-                       disabled="@IsBusy" />
-            <div class="form-text">
-                Puoi selezionare più file insieme o aggiungerli in più riprese (max 50 MB per file).
+    <!-- Indicatore Wizard a 3 step -->
+    <nav aria-label="Avanzamento procedura" class="mb-4">
+        <div class="row g-2">
+            <div class="col-4">
+                <button type="button"
+                        class="btn w-100 text-start py-2 px-3 @(CurrentStep == WizardStep.Upload ? "btn-danger" : "btn-outline-secondary")"
+                        @onclick="() => GoToStepAsync(WizardStep.Upload)"
+                        disabled="@IsBusy">
+                    <div class="small fw-semibold">Step 1</div>
+                    <div class="text-truncate">Carica PDF</div>
+                </button>
+            </div>
+            <div class="col-4">
+                <button type="button"
+                        class="btn w-100 text-start py-2 px-3 @(CurrentStep == WizardStep.Arrange ? "btn-danger" : "btn-outline-secondary")"
+                        @onclick="() => GoToStepAsync(WizardStep.Arrange)"
+                        disabled="@(IsBusy || Workspace.Documents.Count == 0)">
+                    <div class="small fw-semibold">Step 2</div>
+                    <div class="text-truncate">Ordina e Ruota</div>
+                </button>
+            </div>
+            <div class="col-4">
+                <button type="button"
+                        class="btn w-100 text-start py-2 px-3 @(CurrentStep == WizardStep.PreviewAndDownload ? "btn-danger" : "btn-outline-secondary")"
+                        @onclick="() => GoToStepAsync(WizardStep.PreviewAndDownload)"
+                        disabled="@(IsBusy || Workspace.Documents.Count == 0)">
+                    <div class="small fw-semibold">Step 3</div>
+                    <div class="text-truncate">Anteprima e Scarica</div>
+                </button>
             </div>
         </div>
-    </section>
+    </nav>
 
     @if (!string.IsNullOrEmpty(ErrorMessage))
     {
@@ -36,22 +57,102 @@
         <div class="alert alert-success" role="alert">@StatusMessage</div>
     }
 
-    @if (Workspace.Documents.Count == 0)
+    @if (CurrentStep == WizardStep.Upload)
     {
-        <div class="text-center text-muted border rounded-3 py-5 bg-light">
-            Nessun PDF caricato. Seleziona almeno un file per iniziare.
-        </div>
+        <section class="card shadow-sm mb-4">
+            <div class="card-body">
+                <label for="pdfInput" class="form-label fw-semibold">Seleziona uno o più file PDF</label>
+                <InputFile id="pdfInput"
+                           class="form-control"
+                           OnChange="HandleFilesSelectedAsync"
+                           multiple
+                           accept=".pdf,application/pdf"
+                           disabled="@IsBusy" />
+                <div class="form-text">
+                    Puoi selezionare più file insieme o aggiungerli in più riprese (max 50 MB per file).
+                </div>
+            </div>
+        </section>
+
+        @if (Workspace.Documents.Count == 0)
+        {
+            <div class="text-center text-muted border rounded-3 py-5 bg-light">
+                Nessun PDF caricato. Seleziona almeno un file per iniziare.
+            </div>
+        }
+        else
+        {
+            <section class="card shadow-sm mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center bg-white">
+                    <span class="fw-semibold">
+                        File caricati (@Workspace.Documents.Count) &mdash; @Workspace.TotalPages pagine totali
+                    </span>
+                    <button type="button"
+                            class="btn btn-sm btn-outline-danger"
+                            @onclick="ClearWorkspaceAsync"
+                            disabled="@IsBusy">
+                        Svuota lista
+                    </button>
+                </div>
+
+                <ul class="list-group list-group-flush">
+                    @for (var i = 0; i < Workspace.Documents.Count; i++)
+                    {
+                        var doc = Workspace.Documents[i];
+                        var isPreviewing = PreviewedDocumentId == doc.Id;
+
+                        <li class="list-group-item d-flex flex-wrap align-items-center justify-content-between gap-3 py-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="badge bg-secondary rounded-pill">@(i + 1)</span>
+                                <div>
+                                    <div class="fw-semibold text-break">@doc.FileName</div>
+                                    <div class="small text-muted">
+                                        @doc.PageCount @(doc.PageCount == 1 ? "pagina" : "pagine")
+                                        &bull; @doc.FormattedSize
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex align-items-center gap-2">
+                                <button type="button"
+                                        class="btn btn-sm @(isPreviewing ? "btn-secondary" : "btn-outline-secondary")"
+                                        @onclick="() => ToggleDocumentPreviewAsync(doc)"
+                                        disabled="@IsBusy">
+                                    @(isPreviewing ? "Chiudi anteprima" : "Anteprima")
+                                </button>
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-danger"
+                                        title="Rimuovi documento"
+                                        @onclick="() => RemoveDocumentAsync(doc.Id)"
+                                        disabled="@IsBusy">
+                                    &times;
+                                </button>
+                            </div>
+                        </li>
+                    }
+                </ul>
+            </section>
+
+            <div class="d-flex justify-content-end">
+                <button type="button"
+                        class="btn btn-danger btn-lg"
+                        @onclick="() => GoToStepAsync(WizardStep.Arrange)"
+                        disabled="@IsBusy">
+                    Avanti: Ordina e Ruota &rarr;
+                </button>
+            </div>
+        }
     }
-    else
+    else if (CurrentStep == WizardStep.Arrange)
     {
         <section class="card shadow-sm mb-4">
             <div class="card-header d-flex justify-content-between align-items-center bg-white">
                 <span class="fw-semibold">
-                    Documenti in coda (@Workspace.Documents.Count) &mdash; @Workspace.TotalPages pagine totali
+                    Ordine e rotazione (@Workspace.Documents.Count file &mdash; @Workspace.TotalPages pagine totali)
                 </span>
                 <button type="button"
                         class="btn btn-sm btn-outline-danger"
-                        @onclick="Workspace.Clear"
+                        @onclick="ClearWorkspaceAsync"
                         disabled="@IsBusy">
                     Svuota lista
                 </button>
@@ -63,6 +164,7 @@
                     var doc = Workspace.Documents[i];
                     var isFirst = i == 0;
                     var isLast = i == Workspace.Documents.Count - 1;
+                    var isPreviewing = PreviewedDocumentId == doc.Id;
 
                     <li class="list-group-item d-flex flex-wrap align-items-center justify-content-between gap-3 py-3">
                         <div class="d-flex align-items-center gap-3">
@@ -71,7 +173,7 @@
                             <div class="border rounded d-flex align-items-center justify-content-center bg-light"
                                  style="width: 38px; height: 48px; transform: rotate(@(doc.RotationDegrees)deg); transition: transform 0.2s ease;"
                                  title="Orientamento attuale: @(doc.RotationDegrees)°">
-                                <span class="small fw-bold text-primary">PDF</span>
+                                <span class="small fw-bold text-danger">PDF</span>
                             </div>
 
                             <div>
@@ -85,6 +187,13 @@
                         </div>
 
                         <div class="d-flex flex-wrap align-items-center gap-2">
+                            <button type="button"
+                                    class="btn btn-sm @(isPreviewing ? "btn-secondary" : "btn-outline-secondary")"
+                                    @onclick="() => ToggleDocumentPreviewAsync(doc)"
+                                    disabled="@IsBusy">
+                                @(isPreviewing ? "Chiudi anteprima" : "Anteprima")
+                            </button>
+
                             <div class="btn-group btn-group-sm" role="group" aria-label="Rotazione">
                                 <button type="button"
                                         class="btn btn-outline-secondary"
@@ -122,7 +231,7 @@
                             <button type="button"
                                     class="btn btn-sm btn-outline-danger"
                                     title="Rimuovi documento"
-                                    @onclick="() => Workspace.RemoveDocument(doc.Id)"
+                                    @onclick="() => RemoveDocumentAsync(doc.Id)"
                                     disabled="@IsBusy">
                                 &times;
                             </button>
@@ -132,32 +241,115 @@
             </ul>
         </section>
 
-        <section class="card shadow-sm">
-            <div class="card-body d-flex flex-wrap align-items-end justify-content-between gap-3">
-                <div class="flex-grow-1" style="min-width: 240px;">
-                    <label for="outputName" class="form-label fw-semibold">Nome file finale (opzionale)</label>
-                    <input id="outputName"
-                           type="text"
-                           class="form-control"
-                           placeholder="Lascia vuoto per nome automatico con timestamp"
-                           @bind="OutputFileName"
-                           disabled="@IsBusy" />
-                </div>
+        <div class="d-flex flex-wrap justify-content-between gap-2">
+            <button type="button"
+                    class="btn btn-outline-secondary"
+                    @onclick="() => GoToStepAsync(WizardStep.Upload)"
+                    disabled="@IsBusy">
+                &larr; Indietro: Carica altri PDF
+            </button>
 
+            <button type="button"
+                    class="btn btn-danger btn-lg"
+                    @onclick="() => GoToStepAsync(WizardStep.PreviewAndDownload)"
+                    disabled="@IsBusy">
+                @if (IsBusy)
+                {
+                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <span>Generazione anteprima...</span>
+                }
+                else
+                {
+                    <span>Avanti: Anteprima e Unisci &rarr;</span>
+                }
+            </button>
+        </div>
+    }
+    else if (CurrentStep == WizardStep.PreviewAndDownload)
+    {
+        <section class="card shadow-sm mb-4">
+            <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2 bg-white">
+                <span class="fw-semibold">Anteprima PDF finale</span>
+                @if (MergedOutputBytes is not null)
+                {
+                    <span class="small text-muted">
+                        @Workspace.Documents.Count @(Workspace.Documents.Count == 1 ? "documento" : "documenti")
+                        &bull; @Workspace.TotalPages pagine totali
+                        &bull; @FormatByteSize(MergedOutputBytes.Length)
+                    </span>
+                }
+            </div>
+            <div class="card-body">
+                @if (!string.IsNullOrEmpty(OutputPreviewUrl))
+                {
+                    <iframe src="@OutputPreviewUrl"
+                            title="Anteprima del PDF unito"
+                            class="w-100 border rounded mb-3"
+                            style="height: 520px;"></iframe>
+                }
+
+                <div class="d-flex flex-wrap align-items-end justify-content-between gap-3">
+                    <div class="flex-grow-1" style="min-width: 240px;">
+                        <label for="outputName" class="form-label fw-semibold">Nome file finale (opzionale)</label>
+                        <input id="outputName"
+                               type="text"
+                               class="form-control"
+                               placeholder="Lascia vuoto per nome automatico con timestamp"
+                               @bind="OutputFileName"
+                               disabled="@IsBusy" />
+                    </div>
+
+                    <button type="button"
+                            class="btn btn-danger btn-lg"
+                            @onclick="DownloadMergedPdfAsync"
+                            disabled="@(IsBusy || MergedOutputBytes is null)">
+                        @if (IsBusy)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            <span>Download...</span>
+                        }
+                        else
+                        {
+                            <span>Scarica PDF</span>
+                        }
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <div class="d-flex flex-wrap justify-content-between gap-2">
+            <button type="button"
+                    class="btn btn-outline-secondary"
+                    @onclick="() => GoToStepAsync(WizardStep.Arrange)"
+                    disabled="@IsBusy">
+                &larr; Modifica ordine o rotazione
+            </button>
+
+            <button type="button"
+                    class="btn btn-outline-danger"
+                    @onclick="ClearWorkspaceAsync"
+                    disabled="@IsBusy">
+                Nuova unione
+            </button>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(DocumentPreviewUrl) && CurrentStep != WizardStep.PreviewAndDownload)
+    {
+        <section class="card shadow-sm mt-4">
+            <div class="card-header d-flex justify-content-between align-items-center bg-white">
+                <span class="fw-semibold text-truncate">Anteprima: @PreviewedDocumentName</span>
                 <button type="button"
-                        class="btn btn-primary btn-lg"
-                        @onclick="MergeAndDownloadAsync"
-                        disabled="@IsBusy">
-                    @if (IsBusy)
-                    {
-                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                        <span>Elaborazione...</span>
-                    }
-                    else
-                    {
-                        <span>Unisci e Scarica PDF</span>
-                    }
+                        class="btn btn-sm btn-outline-secondary"
+                        @onclick="ClearDocumentPreviewAsync">
+                    Chiudi
                 </button>
+            </div>
+            <div class="card-body">
+                <iframe src="@DocumentPreviewUrl"
+                        title="Anteprima file caricato"
+                        class="w-100 border rounded"
+                        style="height: 460px;"></iframe>
             </div>
         </section>
     }
