@@ -2,6 +2,8 @@
 
 Applicazione **Blazor WebAssembly (PWA)** per unire, ruotare e riordinare più file PDF direttamente nel browser, senza alcun upload su server esterni. Funziona su qualsiasi sistema operativo moderno (**Windows, macOS, Linux, ChromeOS**).
 
+> *Perché la melagrana?* Come i tanti chicchi racchiusi in un unico frutto, **PomegranatePDF** riunisce più documenti sparsi in un solo PDF.
+
 ## Funzionalità principali
 - Caricamento di un numero generico di file PDF (in una o più selezioni).
 - Riordino dei documenti (sposta su / sposta giù) e rimozione dalla coda.
