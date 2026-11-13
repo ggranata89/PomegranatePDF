@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://ggranata89.github.io/PomegranatePDF/sitemap.xml
