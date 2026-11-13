@@ -19,4 +19,13 @@
     <ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Preserva gli assembly PDFsharp dal trimming in Release (necessario per PdfSharpLicense in Blazor WASM) -->
+    <TrimmerRootAssembly Include="PdfSharp" />
+    <TrimmerRootAssembly Include="PdfSharp.License" />
+    <TrimmerRootAssembly Include="PdfSharp.Shared" />
+    <TrimmerRootAssembly Include="PdfSharp.System" />
+    <TrimmerRootAssembly Include="PdfSharp.Cryptography" />
+  </ItemGroup>
+
 </Project>
