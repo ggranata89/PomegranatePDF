@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PdfMergerWasm", "PdfMergerWasm.csproj", "{4221DAC1-6D26-4356-B6B6-EDD9F7E35E4B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PdfMergerWasm.Tests", "PdfMergerWasm.Tests\PdfMergerWasm.Tests.csproj", "{F5C7CDF6-D654-4140-9854-B33FAA3D53AB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4221DAC1-6D26-4356-B6B6-EDD9F7E35E4B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4221DAC1-6D26-4356-B6B6-EDD9F7E35E4B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4221DAC1-6D26-4356-B6B6-EDD9F7E35E4B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4221DAC1-6D26-4356-B6B6-EDD9F7E35E4B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5C7CDF6-D654-4140-9854-B33FAA3D53AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5C7CDF6-D654-4140-9854-B33FAA3D53AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5C7CDF6-D654-4140-9854-B33FAA3D53AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5C7CDF6-D654-4140-9854-B33FAA3D53AB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
