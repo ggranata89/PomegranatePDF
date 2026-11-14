@@ -1,8 +1,8 @@
-using PdfMergerWasm.Models;
-using PdfMergerWasm.Services.Transforms;
+using PomegranatePDF.Models;
+using PomegranatePDF.Services.Transforms;
 using PdfSharp.Pdf;
 
-namespace PdfMergerWasm.Tests.Services.Transforms;
+namespace PomegranatePDF.Tests.Services.Transforms;
 
 public sealed class RotationPageTransformTests
 {

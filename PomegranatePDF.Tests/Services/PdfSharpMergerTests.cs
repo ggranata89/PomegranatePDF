@@ -1,11 +1,11 @@
-using PdfMergerWasm.Models;
-using PdfMergerWasm.Services;
-using PdfMergerWasm.Services.Abstractions;
-using PdfMergerWasm.Services.Transforms;
+using PomegranatePDF.Models;
+using PomegranatePDF.Services;
+using PomegranatePDF.Services.Abstractions;
+using PomegranatePDF.Services.Transforms;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.IO;
 
-namespace PdfMergerWasm.Tests.Services;
+namespace PomegranatePDF.Tests.Services;
 
 public sealed class PdfSharpMergerTests
 {

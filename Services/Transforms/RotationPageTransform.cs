@@ -1,8 +1,8 @@
-using PdfMergerWasm.Models;
-using PdfMergerWasm.Services.Abstractions;
+using PomegranatePDF.Models;
+using PomegranatePDF.Services.Abstractions;
 using PdfSharp.Pdf;
 
-namespace PdfMergerWasm.Services.Transforms;
+namespace PomegranatePDF.Services.Transforms;
 
 /// <summary>
 /// Strategia concreta che applica la rotazione configurata sul documento sorgente a ciascuna pagina.

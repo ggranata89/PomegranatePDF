@@ -1,7 +1,7 @@
 using System.Runtime.CompilerServices;
 using PdfSharp;
 
-namespace PdfMergerWasm.Tests;
+namespace PomegranatePDF.Tests;
 
 internal static class TestSetup
 {

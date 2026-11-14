@@ -1,7 +1,7 @@
-using PdfMergerWasm.Models;
-using PdfMergerWasm.Services.Abstractions;
+using PomegranatePDF.Models;
+using PomegranatePDF.Services.Abstractions;
 
-namespace PdfMergerWasm.Services;
+namespace PomegranatePDF.Services;
 
 /// <summary>
 /// Gestisce lo stato della coda di documenti PDF e notifica i subscriber (Observer Pattern / SRP).

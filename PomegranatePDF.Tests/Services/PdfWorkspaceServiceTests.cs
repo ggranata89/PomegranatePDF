@@ -1,7 +1,7 @@
-using PdfMergerWasm.Services;
-using PdfMergerWasm.Services.Abstractions;
+using PomegranatePDF.Services;
+using PomegranatePDF.Services.Abstractions;
 
-namespace PdfMergerWasm.Tests.Services;
+namespace PomegranatePDF.Tests.Services;
 
 public sealed class PdfWorkspaceServiceTests
 {

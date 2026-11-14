@@ -1,4 +1,4 @@
-namespace PdfMergerWasm.Services.Abstractions;
+namespace PomegranatePDF.Services.Abstractions;
 
 /// <summary>
 /// Contratto per l'ispezione e la lettura dei metadati di un documento PDF (ISP / DIP).

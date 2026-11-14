@@ -1,7 +1,7 @@
 using Microsoft.JSInterop;
-using PdfMergerWasm.Services.Abstractions;
+using PomegranatePDF.Services.Abstractions;
 
-namespace PdfMergerWasm.Services;
+namespace PomegranatePDF.Services;
 
 /// <summary>
 /// Implementazione di <see cref="IFileDownloader"/> tramite modulo JSInterop isolato (Adapter / DIP).

@@ -1,4 +1,4 @@
-namespace PdfMergerWasm.Models;
+namespace PomegranatePDF.Models;
 
 /// <summary>
 /// Rappresenta un singolo file PDF caricato dall'utente, con il suo stato di rotazione e metadati.

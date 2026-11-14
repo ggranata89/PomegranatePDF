@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-using PdfMergerWasm;
-using PdfMergerWasm.Services;
-using PdfMergerWasm.Services.Abstractions;
-using PdfMergerWasm.Services.Transforms;
+using PomegranatePDF;
+using PomegranatePDF.Services;
+using PomegranatePDF.Services.Abstractions;
+using PomegranatePDF.Services.Transforms;
 using PdfSharp;
 
 // Dichiarazione esplicita della licenza AGPLv3 richiesta da PDFsharp 6.5+

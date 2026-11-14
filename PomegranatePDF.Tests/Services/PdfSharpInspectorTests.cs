@@ -1,6 +1,6 @@
-using PdfMergerWasm.Services;
+using PomegranatePDF.Services;
 
-namespace PdfMergerWasm.Tests.Services;
+namespace PomegranatePDF.Tests.Services;
 
 public sealed class PdfSharpInspectorTests
 {

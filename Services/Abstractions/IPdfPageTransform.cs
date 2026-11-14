@@ -1,7 +1,7 @@
-using PdfMergerWasm.Models;
+using PomegranatePDF.Models;
 using PdfSharp.Pdf;
 
-namespace PdfMergerWasm.Services.Abstractions;
+namespace PomegranatePDF.Services.Abstractions;
 
 /// <summary>
 /// Strategy Pattern: definisce una trasformazione applicabile a una singola pagina PDF

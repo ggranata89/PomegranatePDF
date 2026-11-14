@@ -1,9 +1,9 @@
-using PdfMergerWasm.Models;
-using PdfMergerWasm.Services.Abstractions;
+using PomegranatePDF.Models;
+using PomegranatePDF.Services.Abstractions;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.IO;
 
-namespace PdfMergerWasm.Services;
+namespace PomegranatePDF.Services;
 
 /// <summary>
 /// Implementazione di <see cref="IPdfMerger"/> basata su PDFsharp.

@@ -1,6 +1,6 @@
-using PdfMergerWasm.Models;
+using PomegranatePDF.Models;
 
-namespace PdfMergerWasm.Services.Abstractions;
+namespace PomegranatePDF.Services.Abstractions;
 
 /// <summary>
 /// Contratto per l'unione di più documenti PDF in un unico file (ISP / DIP).

@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
-using PdfMergerWasm.Models;
-using PdfMergerWasm.Services;
-using PdfMergerWasm.Services.Abstractions;
+using PomegranatePDF.Models;
+using PomegranatePDF.Services;
+using PomegranatePDF.Services.Abstractions;
 
-namespace PdfMergerWasm.Pages;
+namespace PomegranatePDF.Pages;
 
 /// <summary>
 /// Code-behind della pagina principale: guida l'utente attraverso un wizard a 3 step

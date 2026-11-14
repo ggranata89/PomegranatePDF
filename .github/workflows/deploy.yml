@@ -40,7 +40,7 @@ jobs:
           sed -i 's|const base = "/";|const base = "/PomegranatePDF/";|g' wwwroot/service-worker.published.js
 
       - name: Publish Blazor WebAssembly
-        run: dotnet publish PdfMergerWasm.csproj -c Release -o release --nologo
+        run: dotnet publish PomegranatePDF.csproj -c Release -o release --nologo
 
       - name: Add SPA fallback and .nojekyll
         run: |

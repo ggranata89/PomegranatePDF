@@ -1,6 +1,6 @@
-using PdfMergerWasm.Models;
+using PomegranatePDF.Models;
 
-namespace PdfMergerWasm.Tests.Models;
+namespace PomegranatePDF.Tests.Models;
 
 public sealed class PdfDocumentItemTests
 {

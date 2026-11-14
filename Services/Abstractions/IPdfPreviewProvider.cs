@@ -1,4 +1,4 @@
-namespace PdfMergerWasm.Services.Abstractions;
+namespace PomegranatePDF.Services.Abstractions;
 
 /// <summary>
 /// Astrazione per la creazione e la revoca di URL temporanei di anteprima PDF nel browser (ISP / DIP).

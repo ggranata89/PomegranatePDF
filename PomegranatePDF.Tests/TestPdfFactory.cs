@@ -1,6 +1,6 @@
 using PdfSharp.Pdf;
 
-namespace PdfMergerWasm.Tests;
+namespace PomegranatePDF.Tests;
 
 internal static class TestPdfFactory
 {

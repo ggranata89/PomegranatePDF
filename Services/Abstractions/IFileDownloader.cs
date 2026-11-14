@@ -1,4 +1,4 @@
-namespace PdfMergerWasm.Services.Abstractions;
+namespace PomegranatePDF.Services.Abstractions;
 
 /// <summary>
 /// Astrazione per il download di un file generato sul dispositivo dell'utente (DIP / ISP).

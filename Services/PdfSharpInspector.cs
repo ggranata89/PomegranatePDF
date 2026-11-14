@@ -1,7 +1,7 @@
-using PdfMergerWasm.Services.Abstractions;
+using PomegranatePDF.Services.Abstractions;
 using PdfSharp.Pdf.IO;
 
-namespace PdfMergerWasm.Services;
+namespace PomegranatePDF.Services;
 
 /// <summary>
 /// Implementazione di <see cref="IPdfInspector"/> basata su PDFsharp (SRP).
